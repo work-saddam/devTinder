@@ -1,19 +1,21 @@
 const express = require("express");
 const app = express();
 
-app.get('/users', (req,res, next) => {
-  console.log("Handle 1")
-  // res.send("Handle1")
-  next()
-},(req,res,next) => {
-  console.log("Handle 2")
-  // res.send("Heading2")
-  next()
-},
-(req,res) => {
-  console.log("Handle 3")
-  res.send("Heading3")
-})
+const { adminAuth, userAuth } = require("./middlewares/auth");
+
+app.use("/admin", adminAuth);
+
+app.get("/users", userAuth, (req, res) => {
+  res.send("user");
+});
+
+app.get("/admin/getData", (req, res) => {
+  res.send("getting data");
+});
+
+app.get("/admin/deleteData", (req, res) => {
+  res.send("deleting data");
+});
 
 app.listen(7777, () => {
   console.log(`Server is listening on http://localhost:7777`);

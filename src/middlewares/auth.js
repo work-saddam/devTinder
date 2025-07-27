@@ -1,5 +1,5 @@
 export const adminAuth = (req, res, next) => {
-  const token = "xyz";
+  const token = "xyzx";
   const isAdmin = token === "xyz";
   console.log("check admin");
   if (!isAdmin) {
@@ -10,7 +10,7 @@ export const adminAuth = (req, res, next) => {
 };
 
 export const userAuth = (req, res, next) => {
-  const token = "xyzx";
+  const token = "xyz";
   const isUser = token === "xyz";
   console.log("check user");
   if (!isUser) {

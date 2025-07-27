@@ -6,7 +6,13 @@ const { adminAuth, userAuth } = require("./middlewares/auth");
 app.use("/admin", adminAuth);
 
 app.get("/users", userAuth, (req, res) => {
-  res.send("user");
+  try {
+    // Logic of db call to get data
+    throw new Error("WildCard Error")
+    res.send("user");
+  } catch (error) {
+    res.status(500).send("Something went wrong");
+  }
 });
 
 app.get("/admin/getData", (req, res) => {

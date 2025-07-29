@@ -28,14 +28,25 @@ app.get("/feed", async (req, res) => {
   }
 });
 
-app.delete("/delete", async (req, res) => {
+app.delete("/user", async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.body.userId);
-    res.status(200).send("user deleted");
+    res.send("user deleted Successfully");
   } catch (err) {
     res.status(400).send("Something went wrong");
   }
 });
+
+app.patch("/user", async (req,res) => {
+  try{
+    const userId = req.body.userId;
+    const data = req.body;
+    const user = await User.findByIdAndUpdate(userId, data, {returnDocument:'after'})
+    res.send({message:"User updated: ", user})
+  }catch(err){
+    res.status(400).send("Something went wrong")
+  }
+})
 
 //connect database & listening server
 connectDB()

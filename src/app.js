@@ -18,6 +18,16 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+// Feed API - Get all the users from the database
+app.get("/feed", async (req,res) => {
+  try{
+    const users = await User.find({})
+    res.status(200).send(users)
+  }catch(err){
+    res.status(400).send("Something went wrong")
+  }
+})
+
 //connect database & listening server
 connectDB()
   .then(() => {

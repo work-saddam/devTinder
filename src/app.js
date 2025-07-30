@@ -3,16 +3,33 @@ const app = express();
 require("dotenv").config();
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const { validateSignUpData } = require("./utils/validation");
+const bcrypt = require("bcrypt");
 
 //Convert JSON in js Object
 //Middleware parses incoming requests with JSON payloads and makes the data available on req.body.
 app.use(express.json());
 
+//Signup
 app.post("/signup", async (req, res) => {
   try {
-    const user = new User(req.body);
+    // Validate the req data
+    validateSignUpData(req);
+
+    const { firstName, lastName, emailId, password } = req.body;
+
+    // Hashing the password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Creating the instanse of user model
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+    });
     await user.save();
-    res.status(201).send("user created successfully");
+    res.status(201).json({ message: "User created successfully" });
   } catch (err) {
     res.status(400).send("Error:" + err.message);
   }

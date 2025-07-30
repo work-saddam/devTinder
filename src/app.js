@@ -13,8 +13,8 @@ app.post("/signup", async (req, res) => {
     const user = new User(req.body);
     await user.save();
     res.status(201).send("user created successfully");
-  } catch (error) {
-    res.status(400).send("something went wrog");
+  } catch (err) {
+    res.status(400).send("Error:" + err.message);
   }
 });
 
@@ -37,16 +37,28 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req,res) => {
-  try{
-    const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+  try {
+    const userId = req.params?.userId;
     const data = req.body;
-    const user = await User.findByIdAndUpdate(userId, data, {returnDocument:'after'})
-    res.send({message:"User updated: ", user})
-  }catch(err){
-    res.status(400).send("Something went wrong")
+
+    const ALLOWED_UPDATES = ["photoUrl", "about", "gender", "age", "skills"];
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
+    if (!isUpdateAllowed) {
+      throw new Error("Update not allowed");
+    }
+
+    const user = await User.findByIdAndUpdate(userId, data, {
+      returnDocument: "after",
+      runValidators: true,
+    });
+    res.send({ message: "User updated: ", user });
+  } catch (err) {
+    res.status(400).send("UPDATE FAILED: " + err.message);
   }
-})
+});
 
 //connect database & listening server
 connectDB()

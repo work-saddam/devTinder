@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const userSchema = mongoose.Schema(
   {
@@ -74,6 +76,30 @@ const userSchema = mongoose.Schema(
   },
   { timestamps: true }
 );
+
+//always use normal function, don't use arrow function
+userSchema.methods.getJWT = async function () {
+  const user = this;
+  const token = await jwt.sign(
+    { _id: user._id },
+    process.env.JWT_Security_key,
+    { expiresIn: "1d" }
+  );
+  return token;
+};
+
+//always use normal function, don't use arrow function
+userSchema.methods.validatePassword = async function (passwordInputByUser) {
+  const user = this;
+  const passwordHash = user.password;
+
+  const isPasswordValid = await bcrypt.compare(
+    passwordInputByUser,
+    passwordHash
+  );
+
+  return isPasswordValid;
+};
 
 // Model name should always be capital.
 const User = mongoose.model("User", userSchema);

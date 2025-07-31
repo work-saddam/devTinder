@@ -5,8 +5,8 @@ const connectDB = require("./config/database");
 const User = require("./models/user");
 const { validateSignUpData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const { userAuth } = require("./middlewares/auth");
 
 //Convert JSON in js Object
 //Middleware parses incoming requests with JSON payloads and makes the data available on req.body.
@@ -44,90 +44,42 @@ app.post("/signup", async (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
+    if (!emailId || !password) {
+      throw new Error("email and password are required");
+    }
 
     const user = await User.findOne({ emailId: emailId });
     if (!user) {
       throw new Error("Invalid Credentials");
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (isPasswordValid) {
-      //create Jwt token
-      const token = await jwt.sign({ _id: user._id }, "JWT@SecretKey");
+    // compare the password in userSchema
+    const isPasswordValid = await user.validatePassword(password)
 
-      // Add token in cookie and send response back to the user
-      res.cookie("token", token);
-
-      res.status(200).send("Login successfully");
-    } else {
+    if (!isPasswordValid) {
       throw new Error("Invalid Credentials");
     }
+
+    // Create jwt token in user schema
+    const token = await user.getJWT();
+
+    // Add token in cookie and send response back to the user
+    res.cookie("token", token);
+
+    res.status(200).send("Login successfully");
   } catch (error) {
     res.status(400).send("Error:  " + error.message);
   }
 });
 
-app.get("/profile", async (req, res) => {
+// get Profile
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const { token } = req.cookies;
-    if (!token) {
-      throw new Error("Invalid Token");
-    }
-
-    // jwt verify
-    const decodedMessage = await jwt.verify(token, "JWT@SecretKey");
-    const { _id } = decodedMessage;
-
-    const user = await User.findById({ _id });
-    if (!user) {
-      throw new Error("User not found");
-    }
+    const user = req.user;
 
     res.send(user);
   } catch (error) {
     res.send("ERROR: " + error.message);
-  }
-});
-
-// Feed API - Get all the users from the database
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.status(200).send(users);
-  } catch (err) {
-    res.status(400).send("Something went wrong");
-  }
-});
-
-app.delete("/user", async (req, res) => {
-  try {
-    const user = await User.findByIdAndDelete(req.body.userId);
-    res.send("user deleted Successfully");
-  } catch (err) {
-    res.status(400).send("Something went wrong");
-  }
-});
-
-app.patch("/user/:userId", async (req, res) => {
-  try {
-    const userId = req.params?.userId;
-    const data = req.body;
-
-    const ALLOWED_UPDATES = ["photoUrl", "about", "gender", "age", "skills"];
-    const isUpdateAllowed = Object.keys(data).every((k) =>
-      ALLOWED_UPDATES.includes(k)
-    );
-    if (!isUpdateAllowed) {
-      throw new Error("Update not allowed");
-    }
-
-    const user = await User.findByIdAndUpdate(userId, data, {
-      returnDocument: "after",
-      runValidators: true,
-    });
-    res.send({ message: "User updated: ", user });
-  } catch (err) {
-    res.status(400).send("UPDATE FAILED: " + err.message);
   }
 });
 

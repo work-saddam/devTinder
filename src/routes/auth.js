@@ -1,8 +1,8 @@
-const express = require("express")
-const authRouter = express.Router()
-const bcrypt = require("bcrypt")
-const User = require("../models/user")
-const {validateSignUpData} = require("../utils/validation")
+const express = require("express");
+const authRouter = express.Router();
+const bcrypt = require("bcrypt");
+const User = require("../models/user");
+const { validateSignUpData } = require("../utils/validation");
 
 //Signup
 authRouter.post("/signup", async (req, res) => {
@@ -43,7 +43,7 @@ authRouter.post("/login", async (req, res) => {
     }
 
     // compare the password in userSchema
-    const isPasswordValid = await user.validatePassword(password)
+    const isPasswordValid = await user.validatePassword(password);
 
     if (!isPasswordValid) {
       throw new Error("Invalid Credentials");
@@ -61,4 +61,12 @@ authRouter.post("/login", async (req, res) => {
   }
 });
 
-module.exports = authRouter
+// Logout
+authRouter.post("/logout", (req, res) => {
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+  });
+  res.send("Logout Successfully!!")
+});
+
+module.exports = authRouter;

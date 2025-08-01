@@ -54,6 +54,11 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 // Feed
 userRouter.get("/feed", userAuth, async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    limit = limit > 50 ? 50 : limit;
+    const skip = (page - 1) * limit;
+
     // User see all the cards except-
     // 1. his own card
     // 2. his connection
@@ -82,6 +87,8 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       ],
     })
       .select(USER_SAFE_DATA)
+      .skip(skip)
+      .limit(limit);
 
     res.json({ users });
   } catch (error) {

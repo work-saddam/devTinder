@@ -24,8 +24,8 @@ _From above two apis, we can make only one api to achive same results_.
 - - POST /request/review/:status/:requestId
 
 ## userRouter
+- GET /user/requests/received
 - GET /user/connections
-- GET /user/requests
 - GET /user/feed  - Gets you the profile of other user on plateform
 
 STATUS: ignored, interested, accepted, rejected

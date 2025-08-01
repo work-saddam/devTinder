@@ -4,6 +4,7 @@ const { userAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
 
+// send/request
 requestRouter.post(
   "/send/request/:status/:toUserId",
   userAuth,
@@ -57,6 +58,40 @@ requestRouter.post(
       });
     } catch (error) {
       res.status(400).send("ERROR: " + error.message);
+    }
+  }
+);
+
+// send/review
+requestRouter.post(
+  "/send/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { status, requestId } = req.params;
+
+      const allowedStatus = ["accepted", "rejected"];
+      if (!allowedStatus.includes(status)) {
+        return res.status(400).json({ message: "Status not allowed" });
+      }
+
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUserId: loggedInUser._id,
+        status: "interested",
+      });
+      if (!connectionRequest) {
+        return res
+          .status(400)
+          .json({ message: "Connection request not found" });
+      }
+
+      connectionRequest.status = status;
+      const data = await connectionRequest.save();
+      res.json({ message: `Connection request ${status}`, data });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
     }
   }
 );

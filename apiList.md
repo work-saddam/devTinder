@@ -20,6 +20,9 @@ _From above two apis, we can make only one api to achive same results_.
 - POST /request/review/accepted/:requestId
 - POST /request/review/rejected/:requestId
 
+_From above two apis, we can make only one api to achive same results_.
+- - POST /request/review/:status/:requestId
+
 ## userRouter
 - GET /user/connections
 - GET /user/requests

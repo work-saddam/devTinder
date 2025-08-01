@@ -11,8 +11,12 @@
 - PATCH /profile/password
 
 ## connectionRequestRouter
-- POST /request/send/interested/:userId
-- POST /request/send/ignored/:userId
+- POST /request/send/interested/:toUserId
+- POST /request/send/ignored/:toUserId
+
+_From above two apis, we can make only one api to achive same results_.
+- - POST /request/send/:status/:toUserId
+
 - POST /request/review/accepted/:requestId
 - POST /request/review/rejected/:requestId
 
@@ -21,4 +25,4 @@
 - GET /user/requests
 - GET /user/feed  - Gets you the profile of other user on plateform
 
-STATUS: ignore, interested, accepted, rejected
+STATUS: ignored, interested, accepted, rejected

@@ -55,9 +55,9 @@ authRouter.post("/login", async (req, res) => {
     // Add token in cookie and send response back to the user
     res.cookie("token", token);
 
-    res.status(200).send("Login successfully");
+    res.status(200).json({ user });
   } catch (error) {
-    res.status(400).send("Error:  " + error.message);
+    res.status(400).json({ error: error.message });
   }
 });
 
@@ -66,7 +66,7 @@ authRouter.post("/logout", (req, res) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
   });
-  res.send("Logout Successfully!!")
+  res.send("Logout Successfully!!");
 });
 
 module.exports = authRouter;

@@ -66,14 +66,18 @@ const userSchema = mongoose.Schema(
     },
     about: {
       type: String,
-      maxLength: 50,
       default: "This is default about of the user",
+      validate(value) {
+        if (value.length > 50) {
+          throw new Error(" not be more than 50 words");
+        }
+      },
     },
     skills: {
       type: [String],
       validate(value) {
         if (value.length > 10) {
-          throw new Error("Skills should not be more than 10");
+          throw new Error(" should not be more than 10");
         }
       },
     },

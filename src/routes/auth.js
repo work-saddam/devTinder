@@ -34,19 +34,19 @@ authRouter.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
     if (!emailId || !password) {
-      throw new Error("email and password are required");
+      throw new Error("Email and Password are required!");
     }
 
     const user = await User.findOne({ emailId: emailId });
     if (!user) {
-      throw new Error("Invalid Credentials");
+      throw new Error("Invalid Credentials!");
     }
 
     // compare the password in userSchema
     const isPasswordValid = await user.validatePassword(password);
 
     if (!isPasswordValid) {
-      throw new Error("Invalid Credentials");
+      throw new Error("Invalid Credentials!");
     }
 
     // Create jwt token in user schema
@@ -66,7 +66,7 @@ authRouter.post("/logout", (req, res) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
   });
-  res.send("Logout Successfully!!");
+  res.status(200).json({ message: "Logout Successfully!!" });
 });
 
 module.exports = authRouter;

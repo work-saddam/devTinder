@@ -17,7 +17,7 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
 });
 
 // Edit Profile
-profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+profileRouter.put("/profile/edit", userAuth, async (req, res) => {
   try {
     validateEditProfileData(req);
 
@@ -31,7 +31,7 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
       data: loggedInUser,
     });
   } catch (error) {
-    res.status(400).send("ERROR: " + error.message);
+    res.status(400).json({ error: error.message });
   }
 });
 
@@ -44,11 +44,13 @@ profileRouter.patch("/profile/password", userAuth, async (req, res) => {
     if (!currentPassword || !newPassword)
       throw new Error("all fields are required");
 
-    const isPasswordValid = await loggedInUser.validatePassword(currentPassword);
+    const isPasswordValid = await loggedInUser.validatePassword(
+      currentPassword
+    );
     if (!isPasswordValid) throw new Error("Incorrect Password");
 
-    const isStrongPassword = validator.isStrongPassword(newPassword)
-    if(!isStrongPassword) throw new Error("Please enter strong password")
+    const isStrongPassword = validator.isStrongPassword(newPassword);
+    if (!isStrongPassword) throw new Error("Please enter strong password");
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
 
@@ -60,7 +62,5 @@ profileRouter.patch("/profile/password", userAuth, async (req, res) => {
     res.send("ERROR: " + error.message);
   }
 });
-
-
 
 module.exports = profileRouter;

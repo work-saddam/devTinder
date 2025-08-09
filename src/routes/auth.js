@@ -12,6 +12,11 @@ authRouter.post("/signup", async (req, res) => {
 
     const { firstName, lastName, emailId, password } = req.body;
 
+    const existingUser = await User.findOne({ emailId: emailId });
+    if (existingUser) {
+      throw new Error("Email already exist!");
+    }
+
     // Hashing the password
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -22,10 +27,20 @@ authRouter.post("/signup", async (req, res) => {
       emailId,
       password: passwordHash,
     });
-    await user.save();
-    res.status(201).json({ message: "User created successfully" });
-  } catch (err) {
-    res.status(400).send("Error:" + err.message);
+
+    const savedUser = await user.save();
+
+    // Create jwt token in user schema
+    const token = await user.getJWT();
+
+    // Add token in cookie and send response back to the user
+    res.cookie("token", token, { expires: new Date(Date.now() + 8 * 3600000) });
+
+    res
+      .status(201)
+      .json({ message: "User created successfully", data: savedUser });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 });
 
@@ -53,7 +68,7 @@ authRouter.post("/login", async (req, res) => {
     const token = await user.getJWT();
 
     // Add token in cookie and send response back to the user
-    res.cookie("token", token);
+    res.cookie("token", token, { expires: new Date(Date.now() + 8 * 3600000) });
 
     res.status(200).json({ user });
   } catch (error) {

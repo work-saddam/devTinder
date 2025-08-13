@@ -56,8 +56,7 @@ const userSchema = mongoose.Schema(
     },
     photoUrl: {
       type: String,
-      default:
-        "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG.png",
+      default: "https://freesvg.org/img/abstract-user-flat-4.png",
       vallidate(value) {
         if (!validator.isURL(value)) {
           throw new Error("Invalid URL");

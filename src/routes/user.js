@@ -54,32 +54,23 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 // Feed
 userRouter.get("/feed", userAuth, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     limit = limit > 50 ? 50 : limit;
-    const skip = (page - 1) * limit;
-
-    // User see all the cards except-
-    // 1. his own card
-    // 2. his connection
-    // 3. ignored people
-    // 4. already sent the connection request (interested)
 
     const loggedInUser = req.user;
 
-    // Find all connection requests (sent + recieved)
+    // Find all connection requests (sent + received)
     const connectionRequests = await ConnectionRequest.find({
       $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
     }).select("fromUserId toUserId");
 
     const hideUsersFromFeed = new Set();
-
     connectionRequests.forEach((req) => {
-      hideUsersFromFeed.add(req.toUserId.toString()),
-        hideUsersFromFeed.add(req.fromUserId.toString());
+      hideUsersFromFeed.add(req.toUserId.toString());
+      hideUsersFromFeed.add(req.fromUserId.toString());
     });
-    // console.log(hideUsersFromFeed);
 
+    // Always get fresh users from the beginning (no skip)
     const users = await User.find({
       $and: [
         { _id: { $nin: Array.from(hideUsersFromFeed) } },
@@ -87,11 +78,38 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       ],
     })
       .select(USER_SAFE_DATA)
-      .skip(skip)
       .limit(limit);
 
-    res.status(200).json({ users });
+    // Get total count
+    const totalUsers = await User.countDocuments({
+      $and: [
+        { _id: { $nin: Array.from(hideUsersFromFeed) } },
+        { _id: { $ne: loggedInUser._id } },
+      ],
+    });
+
+    const hasMore = totalUsers > limit;
+
+    // Debug logging
+    // console.log(`Feed Request:`, {
+    //   totalUsers,
+    //   returnedUsers: users.length,
+    //   hasMore,
+    //   hideUsersCount: hideUsersFromFeed.size,
+    // });
+
+    res.status(200).json({
+      users,
+      pagination: {
+        currentPage: 1, // Always page 1 since we don't skip
+        totalPages: Math.ceil(totalUsers / limit),
+        totalUsers,
+        hasMore,
+        usersPerPage: limit,
+      },
+    });
   } catch (error) {
+    console.error("Feed error:", error);
     res.status(400).json({ error: error.message });
   }
 });

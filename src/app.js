@@ -8,7 +8,7 @@ const http = require("http");
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://devtinder-chi.vercel.app",
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -39,7 +39,9 @@ connectDB()
   .then(() => {
     console.log("Database connected");
     server.listen(process.env.PORT, () => {
-      console.log("Server is listening on http://localhost:7777");
+      console.log(
+        `Server is listening on http://localhost:${process.env.PORT}`
+      );
     });
   })
   .catch((err) => {

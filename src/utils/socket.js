@@ -12,8 +12,8 @@ const getSecretRoomId = (userId, targetUserId) => {
 const initializeSocket = (server) => {
   const io = socket(server, {
     cors: {
-      origin: "https://devtinder-chi.vercel.app",
-      Credential: true,
+      origin: ["http://localhost:5173", "https://devtinder-chi.vercel.app"],
+      credentials: true,
     },
   });
 

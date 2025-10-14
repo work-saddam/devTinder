@@ -46,7 +46,7 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
   }
 });
 
-paymentRouter.post("/api/payment/webhook", async (req, res) => {
+paymentRouter.post("/payment/webhook", async (req, res) => {
   try {
     const webhookSignature = req.header("X-Razorpay-Signature");
     console.log("Webhook signature: ", webhookSignature);

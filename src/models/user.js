@@ -54,6 +54,13 @@ const userSchema = mongoose.Schema(
       //   }
       // },
     },
+    isPremium: {
+      type: String,
+      default: false,
+    },
+    membershipType: {
+      type: String,
+    },
     photoUrl: {
       type: String,
       default: "https://freesvg.org/img/abstract-user-flat-4.png",

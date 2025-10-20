@@ -46,10 +46,11 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
   }
 });
 
+// Don't add userAuth here because razorpay hit this api.
 paymentRouter.post("/payment/webhook", async (req, res) => {
   try {
     const webhookSignature = req.header("X-Razorpay-Signature");
-    console.log("Webhook signature: ", webhookSignature);
+    // console.log("Webhook signature: ", webhookSignature);
 
     // https://razorpay.com/docs/webhooks/validate-test/
     const isWebhookValid = validateWebhookSignature(
@@ -85,6 +86,17 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
     res.status(200).json({ msg: "Webhook received successfully!" });
   } catch (error) {
     res.status(500).json({ msg: error.messages });
+  }
+});
+
+paymentRouter.get("/premium/verify", userAuth, async (req, res) => {
+  try {
+    if (req.user.isPremium) {
+      return res.status(200).json({ isPremium: true });
+    }
+    return res.status(200).json({ isPremium: false });
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
   }
 });
 
